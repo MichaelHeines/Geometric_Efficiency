@@ -1,0 +1,7 @@
+IMPORTANT NOTE: This program determines the geometric efficiency for a (possibly annular) circular detector - circular/gaussian distributed source system using Montecarlo 
+integration. The compiler needs to be at least c++17 due to the use of the cylindrical bessel functions of the std library added in that version.
+
+It is critical that the minimum distance z_low is never set to 0, as the integral will not converge causing an unusable point.
+Furthermore, the distances are all given in units of the detector radius. A file can be written out with columns showing the distance
+z, the geometric efficiency using a circular source distribution, and the geometric efficiency of the point source distribution (for 
+comparing purposes). In the annular detector option, the rescaled distance is with respect to the outer detector.
