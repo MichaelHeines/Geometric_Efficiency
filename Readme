@@ -1,13 +1,15 @@
+DISCLAIMER: This code was written for the analysis of an experimental campaign at CERN-MEDICIS. The author cannot be held responsible for any shortcomings of the code.
+
 This github directory contains code to determine the geometric efficiency of circular and gaussian sources, considering isotropic emission.
 
-The Integration folder solves the exact integral (with bessel functions) numerically. This computationally heavy, and the errors are hard to estimate.
-The Emission folder uses monte carlo methods to pick a starting location and initial direction, which are then used to extrapolate the trajectory. These are then used to 
+- The Integration folder contains code that solves the exact integral (with bessel functions) numerically. This computationally heavy, and the errors are hard to estimate.
+- The Emission folder uses monte carlo methods to pick a starting location and initial direction, which are then used to extrapolate the trajectory. These are then used to 
 determine whether or not the particle would hit the detector.
 
 In most cases, the emission method will provide calculations that are several orders of magnitude faster for the same precision. Besides that, the errors can be estimated
 with Poisson statistics.
 
+After cloning the git, execute the command "chmod +x ./Emission/build.sh" once to set up permission to use the shell script build.sh in the emission folder.
 
-DISCLAIMER: This code was written for the analysis of an experimental campaign at CERN-MEDICIS. The author cannot be held responsible for any shortcomings of the code.
 
 
