@@ -190,7 +190,7 @@ int main(int argc, char **argv){
 
     for (int i = 0; i < n_points; i++){
         efficiencies[i] = geom_eff_point(z[i], source, n_perpoint, seed, type);
-        rel_ers[i] = 100 / sqrt(efficiencies[i] * n_perpoint);
+        rel_ers[i] = 100 / sqrt(efficiencies[i] * n_perpoint/2);
         std::cout << z[i]/z[n_points-1] << "\t" << efficiencies[i] << "\t" << rel_ers[i] << std::endl; 
     }
 
