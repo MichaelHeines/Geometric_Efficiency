@@ -120,7 +120,7 @@ double geom_eff_point(double z, double source, int n, int seed, std::string type
     position generate_source(x1, y1);
     position generate_emission(x2, y2);
 
-    if (type == "circular"){
+    if (type == "uniform"){
         generate_source.generate_circular_distr(source, seed);
     } else if (type == "gaussian"){
         generate_source.generate_gaussian_distr(source, seed);
@@ -159,16 +159,26 @@ void write_geo_file(std::vector<double> z, std::vector<double> efficiencies, std
 
 int main(int argc, char **argv){
     int seed = 15763027;
-    std::string type;
-    double z_min, z_max, source, result;
+    std::string source_type, detector_type;
+    double z_min, z_max, source, result, det_fraction;
     int n_points, power;
     std::string filename;
 
-    if (argc != 2){
+    if (argc != 3){
         std::cerr << "ERROR: input option 'circular' or 'gaussian' for the source distribution" << std::endl;
         exit(0);
     } else{
-        type = argv[1];
+        source_type = argv[1];
+        detector_type = argv[2];
+
+        if (source_type != "uniform" && source_type != "gaussian"){
+            std::cerr << "ERROR: input option 'uniform' or 'gaussian' for the source distribution" << std::endl;
+            exit(0);
+        }
+        else if (detector_type != "circular" && detector_type != "annular"){
+            std::cerr << "ERROR: input option 'circular' or 'annular' for the source distribution" << std::endl;
+            exit(0);
+        }
     }
 
     std::cout << "z_min/rd:" << std::endl;
@@ -181,18 +191,36 @@ int main(int argc, char **argv){
     std::cin >> source;
     std::cout << "Power:" << std::endl;
     std::cin >> power;
+    if (detector_type == "annular"){
+        std::cout << "Detector outer/inner:" << std::endl;
+        std::cin >> det_fraction;
+    }
     std::cout << "Filename:" << std::endl;
     std::cin >> filename;
 
     int n_perpoint = pow(10, power);
     std::vector<double> z = linspace(z_min, z_max, n_points);
-    std::vector<double> efficiencies(n_points), rel_ers(n_points);
-    
+    std::vector<double> efficiencies(n_points), rel_ers(n_points), efficiencies_outer(n_points), efficiencies_inner(n_points), rel_ers_outer(n_points), rel_ers_inner(n_points);
     std::cout << "Completion(%)" << "\t" << "Efficiency (%)" << "\t \t" << "Relative error (%)" << std::endl;
 
     for (int i = 0; i < n_points; i++){
-        efficiencies[i] = geom_eff_point(z[i], source, n_perpoint, seed, type);
-        rel_ers[i] = 100 / sqrt(2 * n_perpoint*efficiencies[i]/100);
+        if (detector_type == "circular"){ 
+            efficiencies[i] = geom_eff_point(z[i], source, n_perpoint, seed, source_type);
+            rel_ers[i] = 100 / sqrt(2 * n_perpoint*efficiencies[i]/100);
+        }
+        else if (detector_type == "annular") { 
+            efficiencies_outer[i] = geom_eff_point(z[i], source, n_perpoint, seed, source_type);
+            efficiencies_inner[i] = geom_eff_point(z[i] * det_fraction, source * det_fraction, n_perpoint, seed, source_type);
+            efficiencies[i] = efficiencies_outer[i] - efficiencies_inner[i];
+            rel_ers_outer[i] = 100 / sqrt(2 * n_perpoint*efficiencies_outer[i]/100);
+            rel_ers_inner[i] = 100 / sqrt(2 * n_perpoint*efficiencies_inner[i]/100);
+            rel_ers[i] = sqrt(rel_ers_outer[i] * rel_ers_outer[i] + rel_ers_inner[i] * rel_ers_inner[i]);
+        }
+        else{
+            std::cerr << "ERROR: Detector types can only be circular/annular" << std::endl;
+            exit(0);
+        }
+
         std::cout << z[i]/z[n_points-1] << "\t" << efficiencies[i] << "\t \t" << rel_ers[i] << std::endl; 
     }
 
