@@ -188,7 +188,7 @@ int main(int argc, char **argv){
     std::vector<double> z = linspace(z_min, z_max, n_points);
     std::vector<double> efficiencies(n_points), rel_ers(n_points);
     
-    std::cout << "Completion(%)" << "\t" << "$\epsilon$" << "\t" << "Relative error" << std::endl;
+    std::cout << "Completion(%)" << "\t" << "Efficiency (%)" << "\t \t" << "Relative error (%)" << std::endl;
 
     for (int i = 0; i < n_points; i++){
         efficiencies[i] = geom_eff_point(z[i], source, n_perpoint, seed, type);
