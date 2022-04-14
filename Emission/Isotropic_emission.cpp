@@ -114,15 +114,15 @@ std::vector<double> point_source(std::vector<double> z) {
 }
 
 
-double geom_eff_point(double z, double source, int n, int seed, std::string type){
+double geom_eff_point(double z, double source, int n, int seed, std::string source_type){
     int N_hit = 0;
     std::vector<double> x1(n), x2(n), y1(n), y2(n);
     position generate_source(x1, y1);
     position generate_emission(x2, y2);
 
-    if (type == "uniform"){
+    if (source_type == "uniform"){
         generate_source.generate_circular_distr(source, seed);
-    } else if (type == "gaussian"){
+    } else if (source_type == "gaussian"){
         generate_source.generate_gaussian_distr(source, seed);
     } else{
         std::cerr << "ERROR: Not a valid source type. Choose 'circular' or 'gaussian'" << std::endl;
