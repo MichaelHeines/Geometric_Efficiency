@@ -193,7 +193,7 @@ int main(int argc, char **argv){
     for (int i = 0; i < n_points; i++){
         efficiencies[i] = geom_eff_point(z[i], source, n_perpoint, seed, type);
         rel_ers[i] = 100 / sqrt(2 * n_perpoint*efficiencies[i]);
-        std::cout << z[i]/z[n_points-1] << "\t" << efficiencies[i] << "\t" << rel_ers[i] << std::endl; 
+        std::cout << z[i]/z[n_points-1] << "\t" << efficiencies[i] << "\t \t" << rel_ers[i] << std::endl; 
     }
 
     write_geo_file(z, efficiencies, rel_ers, filename);
