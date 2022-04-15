@@ -8,15 +8,19 @@
 #include <fstream>
 #define pi 3.14159265358979323846
 
+
+# Define the position class; pairs of xy coordinates
 class position {
     public:
         std::vector<double> x, y;
 
+        # Constructor
         position(std::vector<double> x_in, std::vector<double> y_in){
             x = x_in;
             y = y_in;
         }
 
+        # Vector addition
         void add_vec(std::vector<double> x_diff, std::vector<double> y_diff){
             int size_1 = x.size();
             int size_2 = x_diff.size();
@@ -32,6 +36,7 @@ class position {
             }
         }
 
+        # Calculate r^2
         std::vector<double> calculate_rsq(){
             int size = x.size();
             std::vector<double> r_sq(size);
@@ -42,7 +47,7 @@ class position {
             return r_sq;
         }
 
-        // On empty position
+        // On empty position, generate an isotropic distribution that gives extrapolated changes in x and y directions
         void generate_isotropic(double z, int seed){
             std::default_random_engine generator{seed};
             std::uniform_real_distribution<double> phi_distr(0, 2*pi);
@@ -57,7 +62,7 @@ class position {
             }
         }
 
-        // On empty position
+        // On empty position, generate a random point inside a uniform circular source
         void generate_circular_distr(double r_s, int seed){
             std::default_random_engine generator{seed};
             std::uniform_real_distribution<double> phi_distr(0, 2*pi);
@@ -72,7 +77,7 @@ class position {
             }
         }
 
-        // On empty position
+        // On empty position, generate a random point inside a gaussian circular source
         void generate_gaussian_distr(double sigma, int seed){
             std::default_random_engine generator{seed};
             std::uniform_real_distribution<double> phi_distr(0, 2*pi);
@@ -90,6 +95,7 @@ class position {
 };
 
 
+# Make a linspace
 std::vector<double> linspace(double min, double max, int nr_points){
     std::vector<double> out(nr_points);
     double delta = (max - min)/(1.0 * (nr_points - 1));
@@ -101,6 +107,7 @@ std::vector<double> linspace(double min, double max, int nr_points){
 }
 
 
+# Calculate the point source approximation value
 std::vector<double> point_source(std::vector<double> z) {
     int size = z.size();
     std::vector<double> ps(size);
@@ -114,12 +121,15 @@ std::vector<double> point_source(std::vector<double> z) {
 }
 
 
+# Calculate the geometric efficiency at a specific distance
 double geom_eff_point(double z, double source, int n, int seed, std::string source_type){
     int N_hit = 0;
     std::vector<double> x1(n), x2(n), y1(n), y2(n);
+    
     position generate_source(x1, y1);
     position generate_emission(x2, y2);
-
+    
+    # Generate source position and istropic emission direction    
     if (source_type == "uniform"){
         generate_source.generate_circular_distr(source, seed);
     } else if (source_type == "gaussian"){
@@ -131,9 +141,11 @@ double geom_eff_point(double z, double source, int n, int seed, std::string sour
     
     seed++;
     generate_emission.generate_isotropic(z, seed);
+    # Extrapolated position at the same distance as the detector
     generate_source.add_vec(generate_emission.x, generate_emission.y);
     std::vector<double> r_final = generate_source.calculate_rsq();
 
+    # Check if it was a hit or a miss
     for (int i = 0; i < n; i++){
         if (r_final[i] <= 1){
             N_hit++;
@@ -143,6 +155,7 @@ double geom_eff_point(double z, double source, int n, int seed, std::string sour
 }
 
 
+# Write the output file
 void write_geo_file(std::vector<double> z, std::vector<double> efficiencies, std::vector<double> rel_ers, std::string filename) {
     std::vector<double> e_ps = point_source(z);
     std::ofstream myFile(filename);
@@ -158,12 +171,13 @@ void write_geo_file(std::vector<double> z, std::vector<double> efficiencies, std
 
 
 int main(int argc, char **argv){
-    int seed = 15763027;
+    int seed = 15763027;                                # Randomly picked seed
     std::string source_type, detector_type;
     double z_min, z_max, source, result, det_fraction;
     int n_points, power;
     std::string filename;
 
+    # Check if the arguments were appropriate
     if (argc != 3){
         std::cerr << "ERROR: input option 'circular' or 'gaussian' for the source distribution" << std::endl;
         exit(0);
@@ -181,6 +195,7 @@ int main(int argc, char **argv){
         }
     }
 
+    # Input values
     std::cout << "z_min/rd:" << std::endl;
     std::cin >> z_min;
     std::cout << "z_max/rd:" << std::endl;
@@ -203,6 +218,7 @@ int main(int argc, char **argv){
     std::vector<double> efficiencies(n_points), rel_ers(n_points), efficiencies_outer(n_points), efficiencies_inner(n_points), rel_ers_outer(n_points), rel_ers_inner(n_points);
     std::cout << "Completion(%)" << "\t" << "Efficiency (%)" << "\t \t" << "Relative error (%)" << std::endl;
 
+    # Calculate the geometric efficiency at all points
     for (int i = 0; i < n_points; i++){
         if (detector_type == "circular"){ 
             efficiencies[i] = geom_eff_point(z[i], source, n_perpoint, seed, source_type);
@@ -223,7 +239,8 @@ int main(int argc, char **argv){
 
         std::cout << z[i]/z[n_points-1] << "\t" << efficiencies[i] << "\t \t" << rel_ers[i] << std::endl; 
     }
-
+    
+    # Write the output file
     write_geo_file(z, efficiencies, rel_ers, filename);
     return 1;
 }
