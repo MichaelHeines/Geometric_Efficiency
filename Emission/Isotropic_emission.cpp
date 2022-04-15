@@ -140,7 +140,7 @@ double geom_eff_point(double z, double source, int n, int seed, std::string sour
     generate_source.add_vec(generate_emission.x, generate_emission.y);
     std::vector<double> r_final = generate_source.calculate_rsq();          // Calculate r for the extrapolated end position
 
-    # Check if it was a hit or a miss
+    // Check if it was a hit or a miss
     for (int i = 0; i < n; i++){
         if (r_final[i] <= 1){
             N_hit++;                                                        // Add 1 to hit counter
